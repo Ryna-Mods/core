@@ -2,7 +2,7 @@
 ## Title: Ryna Core
 ## Notes: The Ryna companion app's in-game half: settings, the journal and the panel its mods (Ryna_Chronicle and others) build on. /ryna for settings.
 ## Author: Ryna contributors
-## Version: 0.5.0
+## Version: 0.5.1
 ## SavedVariables: RynaDB
 ## X-Ryna-API: 2
 ## X-Ryna-API-Min: 2
