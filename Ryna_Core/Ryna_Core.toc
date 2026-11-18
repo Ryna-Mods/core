@@ -1,0 +1,39 @@
+## Interface: 16001
+## Title: Ryna Core
+## Notes: The Ryna companion app's in-game half: settings, the journal and the panel its mods (Ryna_Chronicle and others) build on. /ryna for settings.
+## Author: Ryna contributors
+## Version: 0.5.0
+## SavedVariables: RynaDB
+## X-Ryna-API: 2
+## X-Ryna-API-Min: 2
+
+Core.lua
+Locales\enUS.lua
+Locales\deDE.lua
+Locales\frFR.lua
+Locales\esES.lua
+Locales\esMX.lua
+Locales\itIT.lua
+Locales\ptBR.lua
+Locales\ruRU.lua
+Locales\koKR.lua
+Locales\zhCN.lua
+Locales\zhTW.lua
+Journal.lua
+Status.lua
+CombatLog.lua
+Credits.lua
+Panel.lua
+Minimap.lua
+Slash.lua
+Window.lua
+Notice.lua
+WhatsNew.lua
+News.lua
+Data.lua
+Mods.lua
+Init.lua
+AgentStatus.lua
+Data\vendors.lua
+Data\auctions.lua
+Data\fights.lua
