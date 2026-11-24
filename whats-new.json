@@ -1,5 +1,12 @@
 [
   {
+    "version": "next",
+    "headline": "Ryna's saved file stays small, so syncing can't stall.",
+    "items": [
+      {"where": "core", "text": "Sightings of other players are dropped from your saved file once the Ryna app has uploaded them. A long-played account's file had grown too big to sync."}
+    ]
+  },
+  {
     "version": "0.5.0",
     "headline": "Ryna's own addon is now called Ryna Core.",
     "items": [

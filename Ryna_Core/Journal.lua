@@ -22,7 +22,12 @@ end
 -- journalThrough in AgentStatus.lua), and never longer than this many seconds. The Prices mod's
 -- `auction` snapshots run to megabytes each, and the API's ingest takes at most 16 MB and keeps
 -- every event it stores, so carrying them for 30 days would fill it.
-J.SHORT_LIVED = { auction = 3 * 86400 }
+--
+-- `seen` (another player noticed, for the census) is here since 0.5.3 for the same reason, by count
+-- rather than size: nameplates in a city make thousands a day, nothing in the game reads one back,
+-- and an account that had played for three weeks carried 58,000 of them (21 of its file's 23 MB),
+-- which took the whole save past the 16 MB the app may upload, so nothing synced at all.
+J.SHORT_LIVED = { auction = 3 * 86400, seen = 3 * 86400 }
 
 -- This account's entry in the companion app's AgentStatus.lua (RynaAgentStatus, rewritten after each
 -- sync and read at login): the one whose accountId is RynaDB.meta.accountId. Nil when the app
