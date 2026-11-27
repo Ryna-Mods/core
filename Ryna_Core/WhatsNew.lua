@@ -6,7 +6,7 @@ local _, ns = ...
 
 ns.NEWS = {
   {
-    version = "next",
+    version = "0.5.4",
     headline = "Every Ryna command is in the minimap menu.",
     items = {
       { where = "core", text = "Click the minimap button and open Commands: every /ryna command is there, so there is nothing to remember. Status is one click too." },
