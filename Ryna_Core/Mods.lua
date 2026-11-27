@@ -34,6 +34,11 @@
 --   Ryna.Slash.Add{ word, run(arg, rest), help, order }   a /ryna <word> command and its help line;
 --                                     arg is the next word, rest the whole line after <word>
 --                                     (cores after 0.3.4; 0.3.4 passes arg only)
+--                                     Optional, for the minimap button's Commands menu (cores
+--                                     after 0.5.3; older ones ignore them): label (the row's words,
+--                                     else the word), menu = { { label, arg, checked }, ... } (the
+--                                     words that follow it, as a submenu), checked() with toggle
+--                                     (a tick box that runs the command with `toggle`), hidden
 --   Ryna.Slash.AddStatusLines(order, fn)   fn() -> lines for /ryna status, at `order`
 --   Ryna.Window.AddSection(spec)      a section of Ryna's one window (Window.lua has the spec), and
 --                                     .Open(key), .Toggle(key), .Hide(), .IsShown(), .Selected(),

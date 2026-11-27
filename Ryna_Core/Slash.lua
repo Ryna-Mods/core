@@ -31,12 +31,35 @@ function ns.SlashAdd(spec)
   end
   commands[#commands + 1] = {
     word = word, run = spec.run, help = spec.help, order = tonumber(spec.order) or 100, seq = #commands + 1,
+    -- For the minimap button's menu (Minimap.lua), all optional: the row's words, the words after
+    -- the command as a submenu, a tick box, or left out of the menu.
+    label = type(spec.label) == "string" and spec.label ~= "" and spec.label or nil,
+    menu = type(spec.menu) == "table" and spec.menu or nil,
+    checked = type(spec.checked) == "function" and spec.checked or nil,
+    toggle = type(spec.toggle) == "string" and spec.toggle or nil,
+    hidden = spec.hidden == true,
   }
   table.sort(commands, function(a, b)
     if a.order ~= b.order then return a.order < b.order end
     return a.seq < b.seq
   end)
   return true
+end
+
+-- The commands as the minimap menu lists them, in /ryna help's order: { word, label, run } and,
+-- where the command said so, `menu` ({ { label, arg, checked }, ... }: the words that follow it) or
+-- `checked` with `toggle` (a tick box). A command with no label of its own is its word, capitalised.
+function ns.SlashList()
+  local out = {}
+  for _, c in ipairs(commands) do
+    if not c.hidden then
+      out[#out + 1] = {
+        word = c.word, label = c.label or (c.word:sub(1, 1):upper() .. c.word:sub(2)), run = c.run,
+        menu = c.menu, checked = c.checked, toggle = c.toggle,
+      }
+    end
+  end
+  return out
 end
 
 local function help()
@@ -120,7 +143,10 @@ local function status()
   for _, line in ipairs(ns.OrderedLines(ns.slashStatusSources)) do ns.Print(line) end
 end
 
-ns.SlashAdd({ word = "status", order = 10, run = status,
+ns.SlashStatus = status
+ns.SlashHelp = help
+
+ns.SlashAdd({ word = "status", order = 10, run = status, hidden = true,
   help = L["/ryna status: what is recorded, the journal's size, combat logging"] })
 local function combatLogCommand(arg)
   if ns.COMBAT_LOG_MODES[arg] then
@@ -132,9 +158,19 @@ local function combatLogCommand(arg)
   end
 end
 
-ns.SlashAdd({ word = "combatlog", order = 20, run = combatLogCommand,
+local function combatLogIs(mode)
+  return function() return ns.db and ns.db.settings.combatLog == mode end
+end
+
+ns.SlashAdd({ word = "combatlog", order = 20, run = combatLogCommand, label = L["Combat log"],
+  menu = {
+    { label = L["In dungeons and raids"], arg = "instances", checked = combatLogIs("instances") },
+    { label = L["Always"], arg = "always", checked = combatLogIs("always") },
+    { label = L["Never"], arg = "never", checked = combatLogIs("never") },
+  },
   help = L["/ryna combatlog instances||always||never: when the addon turns combat logging on"] })
-ns.SlashAdd({ word = "debug", order = 40, run = debugCommand,
+ns.SlashAdd({ word = "debug", order = 40, run = debugCommand, label = L["Debug messages"],
+  checked = function() return ns.Debugging() end, toggle = "toggle",
   help = L["/ryna debug on||off||toggle: print what Ryna is doing to chat "
     .. "(/ryna debug alone: which it is)"] })
 

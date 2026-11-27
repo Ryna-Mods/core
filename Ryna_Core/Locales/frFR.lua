@@ -141,6 +141,11 @@ L["Click: Ryna's menu. Drag: move this button."] = nil
 L["Open Ryna's window on"] = nil
 L["What's new"] = nil
 L["Settings"] = nil
+-- The menu's Commands submenu (every /ryna command) and its Status row.
+L["Commands"] = nil
+L["Help"] = nil
+-- The commands' own rows in it (Slash.lua).
+L["In dungeons and raids"] = nil
 
 -- Slash.lua
 -- Setting states in /ryna status and /ryna debug ("debug messages are on").

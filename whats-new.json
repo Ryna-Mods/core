@@ -1,5 +1,13 @@
 [
   {
+    "version": "next",
+    "headline": "Every Ryna command is in the minimap menu.",
+    "items": [
+      {"where": "core", "text": "Click the minimap button and open Commands: every /ryna command is there, so there is nothing to remember. Status is one click too."},
+      {"where": "core", "text": "The minimap button wears Ryna's own icon."}
+    ]
+  },
+  {
     "version": "0.5.3",
     "headline": "Ryna's saved file stays small, so syncing can't stall.",
     "items": [

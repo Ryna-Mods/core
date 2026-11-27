@@ -207,7 +207,7 @@ function N.ShowAtLogin()
   end
 end
 
-ns.SlashAdd({ word = "news", order = 45, help = L["/ryna news: what's new in this version"],
+ns.SlashAdd({ word = "news", hidden = true, order = 45, help = L["/ryna news: what's new in this version"],
   run = function()
     if not N.Show(N.Latest()) then ns.Print(L["There is no note for this version."]) end
   end })

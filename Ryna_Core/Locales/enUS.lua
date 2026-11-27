@@ -132,6 +132,11 @@ L["Click: Ryna's menu. Drag: move this button."] = true
 L["Open Ryna's window on"] = true
 L["What's new"] = true
 L["Settings"] = true
+-- The menu's Commands submenu (every /ryna command) and its Status row.
+L["Commands"] = true
+L["Help"] = true
+-- The commands' own rows in it (Slash.lua).
+L["In dungeons and raids"] = true
 
 -- Slash.lua
 -- Setting states in /ryna status and /ryna debug ("debug messages are on").

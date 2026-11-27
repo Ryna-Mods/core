@@ -1,5 +1,6 @@
--- Minimap: a round button on the minimap's edge. A click opens Ryna's menu: every section of Ryna's
--- window, what the mods that are on add (the Meter's windows, say), what's new, and Settings last.
+-- Minimap: a round button on the minimap's edge, wearing Ryna's own icon. A click opens Ryna's menu:
+-- every section of Ryna's window, what the mods that are on add (the Meter's windows, say), every
+-- /ryna command under Commands (so nobody has to remember one), Status, what's new, and Settings last.
 -- Dragging moves it around the ring, the tooltip shows the one-line status. Its angle and whether
 -- it's shown live in RynaDB.settings.minimap. No library; nothing happens on a client without a
 -- Minimap frame, and on one without the client's menus a click opens Settings, as it always did.
@@ -8,7 +9,8 @@
 --                                         `checked`, a function, makes it a tick box showing what
 --                                         it returns
 --   M.Rows()                              the menu as rows: { title }, { divider },
---                                         { text, pick } or { text, pick, checked }
+--                                         { text, pick }, { text, pick, checked } or
+--                                         { text, submenu = rows }
 
 local _, ns = ...
 local L = ns.L
@@ -16,7 +18,8 @@ local L = ns.L
 local M = {}
 ns.Minimap = M
 
-local ICON = "Interface\\Icons\\INV_Misc_Note_01"
+-- Ryna's icon, shipped in the addon (Media/icon.tga, 64 by 64, made from the app's icon).
+local ICON = "Interface\\AddOns\\Ryna_Core\\Media\\icon"
 
 -- What the mods added, in the order they are shown.
 M.items = {}
@@ -36,6 +39,37 @@ function M.Add(spec)
   return true
 end
 
+-- A command's row: its words, then the command itself in grey, so the menu teaches the command.
+local function commandText(c)
+  return string.format("%s  |cff999999/ryna %s|r", c.label, c.word)
+end
+
+-- Every /ryna command as menu rows (Slash.lua's SlashList), Help last.
+function M.CommandRows()
+  local rows = { { title = L["Commands"] } }
+  for _, c in ipairs(ns.SlashList and ns.SlashList() or {}) do
+    if c.menu then
+      local sub = { { title = "/ryna " .. c.word } }
+      for _, m in ipairs(c.menu) do
+        if type(m) == "table" and type(m.label) == "string" then
+          local arg = tostring(m.arg or "")
+          sub[#sub + 1] = { text = m.label, pick = function() c.run(arg, arg) end,
+            checked = type(m.checked) == "function" and m.checked or nil }
+        end
+      end
+      rows[#rows + 1] = { text = c.label, submenu = sub }
+    elseif c.checked then
+      local arg = c.toggle or ""
+      rows[#rows + 1] = { text = commandText(c), pick = function() c.run(arg, arg) end, checked = c.checked }
+    else
+      rows[#rows + 1] = { text = commandText(c), pick = function() c.run("", "") end }
+    end
+  end
+  rows[#rows + 1] = { divider = true }
+  rows[#rows + 1] = { text = L["Help"] .. "  |cff999999/ryna help|r", pick = function() ns.SlashHelp() end }
+  return rows
+end
+
 function M.Rows()
   local rows = { { title = "Ryna " .. tostring(ns.VERSION) } }
   local sections = ns.Window.List()
@@ -52,6 +86,9 @@ function M.Rows()
     end
   end
   rows[#rows + 1] = { divider = true }
+  rows[#rows + 1] = { text = L["Commands"], submenu = M.CommandRows() }
+  rows[#rows + 1] = { text = L["Status"], pick = function() ns.SlashStatus() end }
+  rows[#rows + 1] = { divider = true }
   if ns.News and ns.News.Latest() then
     rows[#rows + 1] = { text = L["What's new"], pick = function() ns.News.Show(ns.News.Latest()) end }
   end
@@ -59,24 +96,30 @@ function M.Rows()
   return rows
 end
 
+-- Rows into one level of the client's menu; a row with `submenu` opens another level.
+local function build(parent, rows)
+  for _, row in ipairs(rows) do
+    if row.title then
+      parent:CreateTitle(row.title)
+    elseif row.divider then
+      parent:CreateDivider()
+    elseif row.submenu then
+      local sub = parent:CreateButton(row.text)
+      if type(sub) == "table" and type(sub.CreateButton) == "function" then build(sub, row.submenu) end
+    elseif row.checked then
+      parent:CreateCheckbox(row.text, function() return row.checked() and true or false end, function()
+        ns.Run("minimap menu", row.pick)
+      end)
+    else
+      parent:CreateButton(row.text, function() ns.Run("minimap menu", row.pick) end)
+    end
+  end
+end
+
 -- A click: the menu, or Settings on a client without the client's menus.
 function M.Click(owner)
   local open = ns.Fn("MenuUtil", "CreateContextMenu")
-  local ok = open and pcall(open, owner, function(_, root)
-    for _, row in ipairs(M.Rows()) do
-      if row.title then
-        root:CreateTitle(row.title)
-      elseif row.divider then
-        root:CreateDivider()
-      elseif row.checked then
-        root:CreateCheckbox(row.text, function() return row.checked() and true or false end, function()
-          ns.Run("minimap menu", row.pick)
-        end)
-      else
-        root:CreateButton(row.text, function() ns.Run("minimap menu", row.pick) end)
-      end
-    end
-  end)
+  local ok = open and pcall(open, owner, function(_, root) build(root, M.Rows()) end)
   if not ok then ns.Panel.Open() end
 end
 
@@ -131,9 +174,15 @@ function M.Create()
   bg:SetPoint("CENTER")
   local icon = b:CreateTexture(nil, "ARTWORK")
   icon:SetTexture(ICON)
-  icon:SetSize(18, 18)
+  icon:SetSize(20, 20)
   icon:SetPoint("CENTER")
-  icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+  -- Round, as the button is: the client's own circle as a mask, where it has masks.
+  local mask = b.CreateMaskTexture and b:CreateMaskTexture()
+  if mask and icon.AddMaskTexture then
+    mask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+    mask:SetAllPoints(icon)
+    icon:AddMaskTexture(mask)
+  end
   local border = b:CreateTexture(nil, "OVERLAY")
   border:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
   border:SetSize(53, 53)
